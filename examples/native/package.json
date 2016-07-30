@@ -1,0 +1,18 @@
+{
+  "name": "redux-pipeline-native-examples",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start"
+  },
+  "dependencies": {
+    "react": "^15.1.0",
+    "redux-pipeline": "file:../..",
+    "redux-pipeline-examples-lib": "file:../lib",
+    "react-native": "0.27.2"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-do-expressions": "^6.8.0",
+    "babel-plugin-transform-function-bind": "^6.8.0"
+  }
+}

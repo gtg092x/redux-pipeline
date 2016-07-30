@@ -1,0 +1,104 @@
+<!DOCTYPE html><html lang="en"><head><title>Composite reducer tool</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><link href="./ghpage.css" rel="stylesheet"><script src="https://use.fontawesome.com/9237579915.js"></script><meta charset="UTF-8"></head><body><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#native">Native</a><a class="nav-link" href="#validation">Customization</a><a class="nav-link" href="examples/web/">Examples</a><a class="nav-link github" href="https://github.com/gtg092x/redux-collector" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="text">Your Form is so Dumb</span></h1><div id="example"></div></div><div class="container" id="readme"><h1 id="react-dumb-forms">React Dumb Forms</h1>
+<p>Functional forms with validation plugins powered by <a href="http://facebook.github.io/react/">React</a>.</p>
+<h2 id="installation">Installation</h2>
+<pre><code>% npm install redux-collector
+</code></pre><h2 id="usage">Usage</h2>
+<h3 id="react-dumb-forms-is-a-toolset-for-building-simple-deterministic-forms">React Dumb Forms is a toolset for building simple, deterministic forms</h3>
+<p>Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements <code>onChange</code> and <code>onBlur</code> - if those don&#39;t work for you - you can use presets to write your own!</p>
+<blockquote>
+<p>But wait, there&#39;s more</p>
+</blockquote>
+<p>Integrate schema validation once and forget about it forever! After setting your validation system, you only need to pass in config once when you build a form. It can even be asynchronous.</p>
+<blockquote>
+<p>You&#39;re crazy, how does this magic work?</p>
+</blockquote>
+<p>Simple - property generation. We&#39;re giving you a handful of methods that return objects that you would pass to your input components as properties. Have a look.</p>
+<h3 id="a-dumb-form">A dumb form</h3>
+<h4 id="mydumbform-js">MyDumbForm.js</h4>
+<pre><code class="lang-js">import React from &#39;react&#39;;
+import {connectForm} from &#39;redux-collector&#39;;
+
+function MyDumbForm ({propsFor, labelPropsFor, formProps}) {
+    return (
+        &lt;form {...formProps()}&gt;
+            &lt;label {...labelPropsFor(&#39;firstName&#39;)}&gt;First Name&lt;/label&gt;
+            &lt;input {...propsFor(&#39;firstName&#39;)} /&gt;
+            &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+        &lt;/form&gt;
+    );
+}
+
+export default connectForm(MyDumbForm);
+</code></pre>
+<h3 id="a-smart-component">A smart component</h3>
+<h4 id="mysmartcomponent-js">MySmartComponent.js</h4>
+<pre><code class="lang-js">import React from &#39;react&#39;;
+import MyDumbForm from &#39;./MyDumbForm&#39;;
+
+class MySmartComponent extends React.Component{
+    constructor() {
+        super();
+        this.state = {};
+    }
+    onChange({name, value}) {
+        this.setState({[name]: value});
+    }
+    onSubmit(model) {
+        this.setState({model});
+        console.log(&quot;Send this to a server or something!&quot;);
+    }
+    render() {
+        return (
+            &lt;MyDumbForm 
+                onChange={this.onChange} 
+                onSubmit={this.onSubmit} 
+                model={this.state} 
+            /&gt;
+        );
+    }
+}
+</code></pre>
+<h2 id="native">Native</h2>
+<h3 id="this-works-with-react-native-too">This works with React Native too</h3>
+<p>No way!</p>
+<h3 id="validation">Validation</h3>
+<p>We don&#39;t care what you use! You can use almost any validation system as long you can implement a few error fetching methods.  </p>
+<pre><code class="lang-js">import {setValidator} from &#39;redux-collector&#39;;
+
+setValidator(function(config) {
+    // TODO
+    return {getError, getErrors};
+});
+</code></pre>
+<h3 id="customizing-form-fields">Customizing form fields</h3>
+<p>Do whatever you want!</p>
+<p>All dumb forms is doing is passing properties to your form components. </p>
+<pre><code class="lang-js">import React from &#39;react&#39;
+
+function MyCustomField(props) {
+
+    return (
+        &lt;div&gt;
+            &lt;input {...props} /&gt;
+        &lt;/div&gt;
+    );
+}
+</code></pre>
+<h3 id="error-utils">Error Utils</h3>
+<p>// TODO</p>
+<pre><code class="lang-js">import React from &#39;react&#39;
+</code></pre>
+<h3 id="fieldsets">Fieldsets</h3>
+<p>// TODO</p>
+<pre><code class="lang-js">import React from &#39;react&#39;
+</code></pre>
+<h3 id="radio-and-checkbox-buttons">Radio and Checkbox Buttons</h3>
+<p>// TODO</p>
+<pre><code class="lang-js">import React from &#39;react&#39;
+</code></pre>
+<h3 id="presets">Presets</h3>
+<pre><code class="lang-js">import React from &#39;react&#39;
+</code></pre>
+<h2 id="credits">Credits</h2>
+<p>React Dumb Forms is free software under the MIT license. It was created in sunny Santa Monica by <a href="http://www.mediadrake.com">Matthew Drake</a>.</p>
+</div></div><script src="./examples/web/js/ghpage.js"></script><script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script></body></html>
