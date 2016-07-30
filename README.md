@@ -3,7 +3,7 @@ Redux Pipeline
 
 Merge [Redux][] reducers together to make one composite reducer.
 
-[http://code.mediadrake.com/redux-pipeline]
+<http://code.mediadrake.com/redux-pipeline>
 
 ## Installation
 
