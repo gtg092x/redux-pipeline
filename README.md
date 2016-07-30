@@ -3,6 +3,8 @@ Redux Pipeline
 
 Merge [Redux][] reducers together to make one composite reducer.
 
+[http://code.mediadrake.com/redux-pipeline]
+
 ## Installation
 
     % npm install redux-pipeline
@@ -72,7 +74,7 @@ dispatch({
 
 ## Advanced Features
 
-I know what you're saying - that's so bland, can't this thing do anything that's cool?
+> That's boring, can't this thing do anything that's cool?
 
 It can! Let's check out some more advanced stuff.
 
@@ -128,7 +130,7 @@ There's only one function, but it's got a few different ways to send args in. Le
 #### Functions
 
 ```js
-pipeline([fn ...]);
+pipeline([<Function>...]);
 ```
 
 ```js
@@ -153,9 +155,9 @@ Just take any regular old reducer and pass it in. You can do one reducer or you 
 #### Object Configs
 
 ```js
-pipeline([{select<string>, reducer<Function>} ...]);
+pipeline([{select<string>, reducer<Function>}...]);
 // or
-pipeline([{select<Function>, merge<Function>, reducer<Function>} ...]);
+pipeline([{select<Function>, merge<Function>, reducer<Function>}...]);
 // don't be afraid to mix them together either
 pipeline({select<Function>, merge<Function>, reducer<Function>}, {select<string>, reducer<Function>}, <Function>);
 ```
@@ -190,9 +192,9 @@ If your reducer is changing keys on an object, make sure you have a root reducer
 #### Arrays
 
 ```js
-pipeline([[<string>, <Function>] ...]); // identical to {select<string>, reducer<Function>}
+pipeline([[<string>, <Function>]...]); // identical to {select<string>, reducer<Function>}
 // or
-pipeline([[<Function>, <Function>, <Function>] ...]); // identical to {select<Function>, merge<Function>, reducer<Function>}
+pipeline([[<Function>, <Function>, <Function>]...]); // identical to {select<Function>, merge<Function>, reducer<Function>}
 // you can mix these together too
 ```
 
@@ -226,10 +228,10 @@ This really just maps the array to the configs above. It gets pretty useful if y
 #### Defaults
 
 ```js
-pipeline([<Object> ...]); // identical to (state = <Object>) => state
+pipeline([<Object>...]); // identical to (state = <Object>) => state
 ```
 
-Adding that root reducer in for everything seemed kind of silly, so if you pass in an object that doesn't match a config signature, we'll use it as a default.
+Adding that root reducer just for a default seemed kind of excessive, so if you pass in an object that doesn't match a config signature, we'll use it as a default.
 
 ```js
 import pipeline from 'redux-pipeline';
@@ -252,7 +254,9 @@ export default createStore(
 // State is: {paramOne<Number>, paramTwo<Number>, foo: 'bar'}
 ```
 
-Of course, if you decide to have a reducer with default values that include a string named `select` and a function named `reducer`, this obviously won't work. But let's be honest, that sounds like a silly thing to do. However, if you find yourself in that situation, just use a root reducer that sets those defaults instead - more boilerplate for you.
+Of course, if you decide to have a reducer with default values that include a string named `select` and a function named `reducer`, this obviously won't work. But let's be honest, that sounds like a silly thing to do. 
+
+If you find yourself in that situation, just use a root reducer that sets those defaults instead - more boilerplate for you.
 
 ## Native
 

@@ -1,104 +1,205 @@
-<!DOCTYPE html><html lang="en"><head><title>Composite reducer tool</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><link href="./ghpage.css" rel="stylesheet"><script src="https://use.fontawesome.com/9237579915.js"></script><meta charset="UTF-8"></head><body><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#native">Native</a><a class="nav-link" href="#validation">Customization</a><a class="nav-link" href="examples/web/">Examples</a><a class="nav-link github" href="https://github.com/gtg092x/redux-collector" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="text">Your Form is so Dumb</span></h1><div id="example"></div></div><div class="container" id="readme"><h1 id="react-dumb-forms">React Dumb Forms</h1>
-<p>Functional forms with validation plugins powered by <a href="http://facebook.github.io/react/">React</a>.</p>
+<!DOCTYPE html><html lang="en"><head><title>Composite reducer tool</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><link href="./ghpage.css" rel="stylesheet"><script src="https://use.fontawesome.com/9237579915.js"></script><meta charset="UTF-8"></head><body><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#native">Native</a><a class="nav-link" href="#validation">Customization</a><a class="nav-link" href="examples/web/">Examples</a><a class="nav-link github" href="https://github.com/gtg092x/redux-pipeline" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="text">Your Form is so Dumb</span></h1><div id="example"></div></div><div class="container" id="readme"><h1 id="redux-pipeline">Redux Pipeline</h1>
+<p>Merge <a href="https://github.com/reactjs/redux">Redux</a> reducers together to make one composite reducer.</p>
+<p>[<a href="http://code.mediadrake.com/redux-pipeline">http://code.mediadrake.com/redux-pipeline</a>]</p>
 <h2 id="installation">Installation</h2>
-<pre><code>% npm install redux-collector
+<pre><code>% npm install redux-pipeline
 </code></pre><h2 id="usage">Usage</h2>
-<h3 id="react-dumb-forms-is-a-toolset-for-building-simple-deterministic-forms">React Dumb Forms is a toolset for building simple, deterministic forms</h3>
-<p>Getting tired of managing custom re-implementations of every kind of input? Yeah, me too. With React Dumb Forms, you can use every input already created by Facebook and every custom input widget that implements <code>onChange</code> and <code>onBlur</code> - if those don&#39;t work for you - you can use presets to write your own!</p>
+<h3 id="redux-pipeline-combines-reducers-together-to-make-composite-reducers-dead-simple">Redux pipeline combines reducers together to make composite reducers dead simple</h3>
+<p>Tired of massive, unwieldly switch statements? Wish you could break up reducers into re-usable and configurable parts?</p>
 <blockquote>
-<p>But wait, there&#39;s more</p>
+<p>Yes, this problem is literally ruining my life.</p>
 </blockquote>
-<p>Integrate schema validation once and forget about it forever! After setting your validation system, you only need to pass in config once when you build a form. It can even be asynchronous.</p>
-<blockquote>
-<p>You&#39;re crazy, how does this magic work?</p>
-</blockquote>
-<p>Simple - property generation. We&#39;re giving you a handful of methods that return objects that you would pass to your input components as properties. Have a look.</p>
-<h3 id="a-dumb-form">A dumb form</h3>
-<h4 id="mydumbform-js">MyDumbForm.js</h4>
-<pre><code class="lang-js">import React from &#39;react&#39;;
-import {connectForm} from &#39;redux-collector&#39;;
+<p>We thought so. With redux-pipeline you can chain reducers together and get back to worrying about application logic instead of how tired you are from javascript fatigue.</p>
+<h4 id="mystore-js">MyStore.js</h4>
+<pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
+import pipeline from &#39;redux-pipeline&#39;;
 
-function MyDumbForm ({propsFor, labelPropsFor, formProps}) {
-    return (
-        &lt;form {...formProps()}&gt;
-            &lt;label {...labelPropsFor(&#39;firstName&#39;)}&gt;First Name&lt;/label&gt;
-            &lt;input {...propsFor(&#39;firstName&#39;)} /&gt;
-            &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
-        &lt;/form&gt;
-    );
+function addReducer(state = 0, action) {
+    switch(action.type) {
+        case &#39;ADD&#39;:
+            return state + action.data;
+        default:
+            return state;
+    }
 }
 
-export default connectForm(MyDumbForm);
-</code></pre>
-<h3 id="a-smart-component">A smart component</h3>
-<h4 id="mysmartcomponent-js">MySmartComponent.js</h4>
-<pre><code class="lang-js">import React from &#39;react&#39;;
-import MyDumbForm from &#39;./MyDumbForm&#39;;
-
-class MySmartComponent extends React.Component{
-    constructor() {
-        super();
-        this.state = {};
-    }
-    onChange({name, value}) {
-        this.setState({[name]: value});
-    }
-    onSubmit(model) {
-        this.setState({model});
-        console.log(&quot;Send this to a server or something!&quot;);
-    }
-    render() {
-        return (
-            &lt;MyDumbForm 
-                onChange={this.onChange} 
-                onSubmit={this.onSubmit} 
-                model={this.state} 
-            /&gt;
-        );
+function subtractReducer(state = 0, action) {
+    switch(action.type) {
+        case &#39;SUBTRACT&#39;:
+            return state - action.data;
+        default:
+            return state;
     }
 }
+
+export default createStore(
+  pipeline(addReducer, subtractReducer)
+);
 </code></pre>
+<p>Then just call actions like normal!</p>
+<h4 id="myactions-js">MyActions.js</h4>
+<pre><code class="lang-js">import store from &#39;./MyStore&#39;
+
+const {dispatch, subscribe, getState} = store;
+
+subscribe(val =&gt; console.log(&#39;State is:&#39;, getState()));
+
+dispatch({
+    type: &#39;ADD&#39;,
+    data: 2
+});
+// State is: 2
+
+dispatch({
+    type: &#39;SUBTRACT&#39;,
+    data: 10
+});
+// State is: -8
+</code></pre>
+<h2 id="advanced-features">Advanced Features</h2>
+<blockquote>
+<p>That&#39;s boring, can&#39;t this thing do anything that&#39;s cool?</p>
+</blockquote>
+<p>It can! Let&#39;s check out some more advanced stuff.</p>
+<h3 id="namespacing">Namespacing</h3>
+<p>You might want to apply a reducer to a single state key. Well that&#39;s easy as pie.</p>
+<h3 id="defaults">Defaults</h3>
+<p>If you&#39;re heavy into namespacing, defaults are a pain - just pass it in instead of a reducer.</p>
+<h3 id="nesting">Nesting</h3>
+<p>Because we&#39;re just making reducers, you&#39;re free to do this!</p>
+<h3 id="configurable-reducers">Configurable Reducers</h3>
+<p>Not something you absolutely need this package for, but it makes this pattern a whole lot easier.</p>
+<h3 id="interrupt">Interrupt</h3>
+<p>You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions. There&#39;s actually a way to do this.</p>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function reducer1(state = 0, action, end) {
+    // ...
+}
+
+function reducer2(state = 0, action) {
+    // ...
+}
+
+export default createStore(
+  pipeline(reducer1, reducer2)
+);
+// State is: Number
+</code></pre>
+<h2 id="api">API</h2>
+<h3 id="pipeline">pipeline</h3>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+pipeline([steps ...]);
+</code></pre>
+<p>There&#39;s only one function, but it&#39;s got a few different ways to send args in. Let&#39;s look at them all.</p>
+<h4 id="functions">Functions</h4>
+<pre><code class="lang-js">pipeline([&lt;Function&gt;...]);
+</code></pre>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function reducer1(state = 0, action) {
+    // ...
+}
+
+function reducer2(state = 0, action) {
+    // ...
+}
+
+export default createStore(
+  pipeline(reducer1, reducer2)
+);
+// State is: Number
+</code></pre>
+<p>Just take any regular old reducer and pass it in. You can do one reducer or you can do 100.</p>
+<h4 id="object-configs">Object Configs</h4>
+<pre><code class="lang-js">pipeline([{select&lt;string&gt;, reducer&lt;Function&gt;}...]);
+// or
+pipeline([{select&lt;Function&gt;, merge&lt;Function&gt;, reducer&lt;Function&gt;}...]);
+// don&#39;t be afraid to mix them together either
+pipeline({select&lt;Function&gt;, merge&lt;Function&gt;, reducer&lt;Function&gt;}, {select&lt;string&gt;, reducer&lt;Function&gt;}, &lt;Function&gt;);
+</code></pre>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function rootReducer(state = {}, action) {
+    return state;
+}
+
+function reducer1(state = 0, action) {
+    // ...
+}
+
+function reducer2(state = 0, action) {
+    // ...
+}
+
+export default createStore(
+  pipeline(
+    rootReducer,
+    {select: &#39;paramOne&#39; ,reducer: reducer1}, 
+    {select: state =&gt; state.paramTwo, merge: (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2}
+  )
+);
+// State is: {paramOne&lt;Number&gt;, paramTwo&lt;Number&gt;}
+</code></pre>
+<p>If your reducer is changing keys on an object, make sure you have a root reducer or a default value! Look at the <code>select</code> example above if this seems crazy.</p>
+<h4 id="arrays">Arrays</h4>
+<pre><code class="lang-js">pipeline([[&lt;string&gt;, &lt;Function&gt;]...]); // identical to {select&lt;string&gt;, reducer&lt;Function&gt;}
+// or
+pipeline([[&lt;Function&gt;, &lt;Function&gt;, &lt;Function&gt;]...]); // identical to {select&lt;Function&gt;, merge&lt;Function&gt;, reducer&lt;Function&gt;}
+// you can mix these together too
+</code></pre>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function rootReducer(state = {}, action) {
+    return state;
+}
+
+function reducer1(state = 0, action) {
+    // ...
+}
+
+function reducer2(state = 0, action) {
+    // ...
+}
+
+export default createStore(
+  pipeline(
+    rootReducer,
+    [&#39;paramOne&#39;, reducer1], 
+    [state =&gt; state.paramTwo, (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2]
+  )
+);
+// State is: {paramOne&lt;Number&gt;, paramTwo&lt;Number&gt;}
+</code></pre>
+<p>This really just maps the array to the configs above. It gets pretty useful if you&#39;re nesting reducers.</p>
+<h4 id="defaults">Defaults</h4>
+<pre><code class="lang-js">pipeline([&lt;Object&gt;...]); // identical to (state = &lt;Object&gt;) =&gt; state
+</code></pre>
+<p>Adding that root reducer just for a default seemed kind of excessive, so if you pass in an object that doesn&#39;t match a config signature, we&#39;ll use it as a default.</p>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function reducer1(state = 0, action) {
+    // ...
+}
+
+function reducer2(state = 0, action) {
+    // ...
+}
+
+export default createStore(
+  pipeline(
+    {foo: &#39;bar&#39;},
+    [&#39;paramOne&#39;, reducer1], 
+    [state =&gt; state.paramTwo, (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2]
+  )
+);
+// State is: {paramOne&lt;Number&gt;, paramTwo&lt;Number&gt;, foo: &#39;bar&#39;}
+</code></pre>
+<p>Of course, if you decide to have a reducer with default values that include a string named <code>select</code> and a function named <code>reducer</code>, this obviously won&#39;t work. But let&#39;s be honest, that sounds like a silly thing to do. </p>
+<p>If you find yourself in that situation, just use a root reducer that sets those defaults instead - more boilerplate for you.</p>
 <h2 id="native">Native</h2>
 <h3 id="this-works-with-react-native-too">This works with React Native too</h3>
-<p>No way!</p>
-<h3 id="validation">Validation</h3>
-<p>We don&#39;t care what you use! You can use almost any validation system as long you can implement a few error fetching methods.  </p>
-<pre><code class="lang-js">import {setValidator} from &#39;redux-collector&#39;;
-
-setValidator(function(config) {
-    // TODO
-    return {getError, getErrors};
-});
-</code></pre>
-<h3 id="customizing-form-fields">Customizing form fields</h3>
-<p>Do whatever you want!</p>
-<p>All dumb forms is doing is passing properties to your form components. </p>
-<pre><code class="lang-js">import React from &#39;react&#39;
-
-function MyCustomField(props) {
-
-    return (
-        &lt;div&gt;
-            &lt;input {...props} /&gt;
-        &lt;/div&gt;
-    );
-}
-</code></pre>
-<h3 id="error-utils">Error Utils</h3>
-<p>// TODO</p>
-<pre><code class="lang-js">import React from &#39;react&#39;
-</code></pre>
-<h3 id="fieldsets">Fieldsets</h3>
-<p>// TODO</p>
-<pre><code class="lang-js">import React from &#39;react&#39;
-</code></pre>
-<h3 id="radio-and-checkbox-buttons">Radio and Checkbox Buttons</h3>
-<p>// TODO</p>
-<pre><code class="lang-js">import React from &#39;react&#39;
-</code></pre>
-<h3 id="presets">Presets</h3>
-<pre><code class="lang-js">import React from &#39;react&#39;
-</code></pre>
+<p>Nothing special - use it like any other redux package. Check the examples if you don&#39;t believe me.</p>
 <h2 id="credits">Credits</h2>
-<p>React Dumb Forms is free software under the MIT license. It was created in sunny Santa Monica by <a href="http://www.mediadrake.com">Matthew Drake</a>.</p>
-</div></div><script src="./examples/web/js/ghpage.js"></script><script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script></body></html>
+<p>Redux Pipeline is free software under the MIT license. It was created in sunny Santa Monica by <a href="http://www.mediadrake.com">Matthew Drake</a>.</p>
+</div></div><script src="./examples/web/js/ghpage.js"></script><script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script><script>$('a[href="http://code.mediadrake.com/redux-pipeline"]').remove();</script></body></html>
