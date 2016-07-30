@@ -19,6 +19,9 @@ const mapDefaults = {
 function propMap(key) {
   return {
     select(state) {
+      if (!_.isObject(state)) {
+        throw {name: 'stateMerge', message: '[Redux Pipeline] Can\'t Namespace when a string or numeric selector when state is not an object. Add a root reducer or default argument'};
+      }
       return state[key];
     },
     merge(result, state) {
@@ -30,13 +33,17 @@ function propMap(key) {
   };
 }
 
+function isValidKey(key) {
+  return _.isString(key) || _.isNumber(key) || _.isSymbol(key);
+}
+
 /*
   @param reducer argument - one of the steps passed to pipeline(...)
   Returns {select<Function>, merge<Function>, reducer<Function>}
  */
 function normalizeArg(reducerArg) {
   if (_.isArray(reducerArg)) {
-    if (reducerArg.length === 2 && _.isString(reducerArg[0]) && _.isFunction(reducerArg[1])) {
+    if (reducerArg.length === 2 && isValidKey(reducerArg[0]) && _.isFunction(reducerArg[1])) {
       const [select, reducer] = reducerArg;
       return normalizeArg({select, reducer});
     } else if (reducerArg.length === 3 && _.isFunction(reducerArg[0]) && _.isFunction(reducerArg[1]) && _.isFunction(reducerArg[2])) {

@@ -83,34 +83,192 @@ It can! Let's check out some more advanced stuff.
 You might want to apply a reducer to a single state key. Well that's easy as pie.
 
 ```js
+import { createStore } from 'redux';
 import pipeline from 'redux-pipeline';
 
-function reducer1(state = 0, action) {
-    // ...
+// If you're going to namespace, make sure your state is an object!
+function rootReducer(state = {myNumber: 0, myBoolean: false}, action) {
+    return state;
 }
 
-function reducer2(state = 0, action) {
-    // ...
+function mathReducer(state = 0, action) {
+    switch(action.type) {
+        case "ADD":
+            return state + action.data;
+        default:
+            return state;
+    }
 }
 
-export default createStore(
-  pipeline(reducer1, reducer2)
+function toggleReducer(state = false, action) {
+    switch(action.type) {
+        case "TOGGLE":
+            return !state;
+        default:
+            return state;
+    }    
+}
+
+const store = createStore(
+  pipeline(
+    rootReducer,    
+    {select: 'myNumber', reducer: mathReducer}, // identical to ['myNumber', mathReducer]
+    {select: 'myBoolean', reducer: toggleReducer}
+  )
 );
-// State is: Number
+
+store.dispatch({
+   type: 'ADD',
+   data: 10
+});
+
+store.dispatch({
+   type: 'TOGGLE'
+});
+
+// State is: {myNumber: 10, myBoolean: true}
 ```
+
+Alternatively, you can pass in select and merge methods. The following would be identical to the pipeline above:
+
+```js
+export default createStore(
+  pipeline(
+    rootReducer,    
+    {select: state => state.myBoolean, merge: (result, state) => ({...state, myBoolean: result}), reducer: toggleReducer}, // alternatively you can call [state => state.myBoolean, (result, state) => ({...state, myBoolean: result}), toggleReducer]
+    {select: state => state.myNumber, merge: (result, state) => ({...state, myNumber: result}), reducer: mathReducer}
+  )
+);
+```
+
 
 ### Defaults
 
 If you're heavy into namespacing, defaults are a pain - just pass it in instead of a reducer.
 
+```js
+import { createStore } from 'redux';
+import pipeline from 'redux-pipeline';
+
+function mathReducer(state = 0, action) {
+    // ...
+}
+
+function toggleReducer(state = false, action) {
+    // ...
+}
+
+const store = createStore(
+  pipeline(
+    {foo: 'bar'}, // Just pass in an object - this will be your default state
+    {select: 'myNumber', reducer: mathReducer},
+    {select: 'myBoolean', reducer: toggleReducer}
+  )
+);
+
+store.dispatch({
+   type: 'ADD',
+   data: 10
+});
+
+store.dispatch({
+   type: 'TOGGLE'
+});
+
+// State is: {myNumber: 10, myBoolean: true, foo: 'bar'}
+```
+
 ### Nesting
 
-Because we're just making reducers, you're free to do this!
+Because we're just making reducers, you're free to do pipe all the way down!
 
+```js
+import { createStore } from 'redux';
+import pipeline from 'redux-pipeline';
+
+function mathReducer(state = 0, action) {
+    // ...
+}
+
+function toggleReducer(state = false, action) {
+    // ...
+}
+
+const store = createStore(
+  pipeline(
+    {data: {}, otherData: {}},
+    {select: 'data', reducer: pipeline(
+        {select: 'myNumber', reducer: mathReducer},
+        {select: 'myBoolean', reducer: toggleReducer}
+    )},
+    // you can use the same shortcuts when you nest
+    // this is pretty much the same thing
+    ['otherData', pipeline(
+        ['myNumber', mathReducer],
+        ['myBoolean', toggleReducer],
+    )]
+  )
+);
+
+store.dispatch({
+   type: 'ADD',
+   data: 10
+});
+
+store.dispatch({
+   type: 'TOGGLE'
+});
+
+/* 
+    State is:
+    {
+        data: {myNumber: 10, myBoolean: true},
+        otherData: {myNumber: 10, myBoolean: true}
+    }
+*/
+```
 
 ### Configurable Reducers
 
 Not something you absolutely need this package for, but it makes this pattern a whole lot easier.
+
+```js
+import { createStore } from 'redux';
+import pipeline from 'redux-pipeline';
+
+function genericMathReducer({add, subtract}) {
+    return (state = 0, action) => {
+        switch(action.type) {
+            case add:
+                return state + action.data;
+            case subtract:
+                return state - action.data;
+            default:
+                return state;
+        }        
+    };    
+}
+
+const store = createStore(
+  pipeline(
+    {myNumber: 0, myOtherNumber: 0}, 
+    ['myNumber', genericMathReducer({add: 'ADD_NUMBER', subtract: 'SUBTRACT_NUMBER'})],
+    ['myOtherNumber', genericMathReducer({add: 'ADD_OTHER_NUMBER', subtract: 'SUBTRACT_OTHER_NUMBER'})]
+  )
+);
+
+store.dispatch({
+   type: 'ADD_NUMBER',
+   data: 10
+});
+
+store.dispatch({
+   type: 'SUBTRACT_OTHER_NUMBER',
+   data: 5
+});
+
+// State is: {myNumber: 10, myOtherNumber: -5}
+```
 
 ### Interrupt
 
@@ -119,19 +277,52 @@ You might want to stop the flow of the reducer chain. This is especially true if
 ```js
 import pipeline from 'redux-pipeline';
 
-function reducer1(state = 0, action, end) {
-    // ...
+// Math reducer would come from a library or something
+function mathReducer(state = 0, action) {
+    switch(action.type) {
+        case "ADD":
+            return state + action.data;
+        case "SUBTRACT":
+            return state - action.data;
+        default:
+            return state;
+    }
 }
 
-function reducer2(state = 0, action) {
-    // ...
+function blockSubtract(state = 0, action, end) {
+    switch(action.type) {        
+        case "SUBTRACT":
+            // Notice we're passing state to the end method
+            return end(state);
+        default:
+            return state;
+    }
 }
 
-export default createStore(
-  pipeline(reducer1, reducer2)
+const store = createStore(
+  pipeline(
+    blockSubtract, 
+    mathReducer
+  )
 );
-// State is: Number
+
+store.dispatch({
+   type: 'ADD',
+   data: 10
+});
+
+// This gets blocked
+store.dispatch({
+   type: 'SUBTRACT',
+   data: 5
+});
+
+// State is: 10
 ```
+
+Order matters! If you put an interrupting reducer last, it won't change anything because we're doing them in order.
+
+Right now end is just a killswitch. If there's a need for finer controls with it. File an issue.
 
 ## API
 
