@@ -82,6 +82,23 @@ It can! Let's check out some more advanced stuff.
 
 You might want to apply a reducer to a single state key. Well that's easy as pie.
 
+```js
+import pipeline from 'redux-pipeline';
+
+function reducer1(state = 0, action) {
+    // ...
+}
+
+function reducer2(state = 0, action) {
+    // ...
+}
+
+export default createStore(
+  pipeline(reducer1, reducer2)
+);
+// State is: Number
+```
+
 ### Defaults
 
 If you're heavy into namespacing, defaults are a pain - just pass it in instead of a reducer.
@@ -263,6 +280,12 @@ If you find yourself in that situation, just use a root reducer that sets those 
 ### This works with React Native too
 
 Nothing special - use it like any other redux package. Check the examples if you don't believe me.
+
+## Combine Stores
+
+> Do I have to do anything special to use `combineStores`?
+
+No - these are just reducers after all.
 
 ## Credits
 
