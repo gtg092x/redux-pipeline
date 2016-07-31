@@ -11,7 +11,7 @@ Merge [Redux][] reducers together to make one composite reducer.
 
 ## Usage
 
-### Redux pipeline combines reducers together to make composite reducers dead simple  
+### Redux pipeline combines reducers into a single, manageable sequence  
 
 Tired of massive, unwieldly switch statements? Wish you could break up reducers into re-usable and configurable parts?
 
@@ -135,8 +135,18 @@ Alternatively, you can pass in select and merge methods. The following would be 
 export default createStore(
   pipeline(
     rootReducer,    
-    {select: state => state.myBoolean, merge: (result, state) => ({...state, myBoolean: result}), reducer: toggleReducer}, // alternatively you can call [state => state.myBoolean, (result, state) => ({...state, myBoolean: result}), toggleReducer]
-    {select: state => state.myNumber, merge: (result, state) => ({...state, myNumber: result}), reducer: mathReducer}
+    {
+        select: state => state.myBoolean, 
+        merge: (result, state) => ({...state, myBoolean: result}), 
+        reducer: toggleReducer
+    }, 
+    // alternatively you can call 
+    // [state => state.myBoolean, (result, state) => ({...state, myBoolean: result}), toggleReducer]
+    {
+        select: state => state.myNumber, 
+        merge: (result, state) => ({...state, myNumber: result}), 
+        reducer: mathReducer
+    }
   )
 );
 ```
@@ -160,7 +170,7 @@ function toggleReducer(state = false, action) {
 
 const store = createStore(
   pipeline(
-    {foo: 'bar'}, // Just pass in an object - this will be your default state
+    {myNumber: 0, myBoolean: false}, // Just pass in an object - this will be your default state
     {select: 'myNumber', reducer: mathReducer},
     {select: 'myBoolean', reducer: toggleReducer}
   )
@@ -175,7 +185,7 @@ store.dispatch({
    type: 'TOGGLE'
 });
 
-// State is: {myNumber: 10, myBoolean: true, foo: 'bar'}
+// State is: {myNumber: 10, myBoolean: true}
 ```
 
 ### Nesting
@@ -272,10 +282,20 @@ store.dispatch({
 
 ### Interrupt
 
-You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions. There's actually a way to do this.
+You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions.
 
 ```js
 import pipeline from 'redux-pipeline';
+
+function blockSubtract(state = 0, action, end) {
+    switch(action.type) {        
+        case "SUBTRACT":
+            // Notice we're passing state to the end method
+            return end(state);
+        default:
+            return state;
+    }
+}
 
 // Math reducer would come from a library or something
 function mathReducer(state = 0, action) {
@@ -284,16 +304,6 @@ function mathReducer(state = 0, action) {
             return state + action.data;
         case "SUBTRACT":
             return state - action.data;
-        default:
-            return state;
-    }
-}
-
-function blockSubtract(state = 0, action, end) {
-    switch(action.type) {        
-        case "SUBTRACT":
-            // Notice we're passing state to the end method
-            return end(state);
         default:
             return state;
     }
@@ -321,8 +331,6 @@ store.dispatch({
 ```
 
 Order matters! If you put an interrupting reducer last, it won't change anything because we're doing them in order.
-
-Right now end is just a killswitch. If there's a need for finer controls with it. File an issue.
 
 ## API
 
@@ -465,6 +473,16 @@ export default createStore(
 Of course, if you decide to have a reducer with default values that include a string named `select` and a function named `reducer`, this obviously won't work. But let's be honest, that sounds like a silly thing to do. 
 
 If you find yourself in that situation, just use a root reducer that sets those defaults instead - more boilerplate for you.
+
+### debugPipeline
+
+```js
+import {debugPipeline} from 'redux-pipeline';
+pipeline([steps ...]);
+```
+
+Same as the default pipeline function, just with a lot of console noise.
+
 
 ## Native
 

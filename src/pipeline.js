@@ -63,7 +63,7 @@ function normalizeArg(reducerArg) {
   return {...mapDefaults, ...reducerArg};
 }
 
-function configure({debug = false}) {
+function configure({debug = false} = {}) {
   const log = (...args) => debug === true ? console.log(...args) : _.noop;
   /*
    Merge reducers into a single reducer.
@@ -112,11 +112,10 @@ function configure({debug = false}) {
 
             // Symbols to get around waterfall's control methods
             if (outEarlyState === undefined) {
-              log(`Received undefined interrupt, passing ${EARLY_UNDEFINED}`);
+              log(`Received undefined interrupt, passing ${String(EARLY_UNDEFINED)}`);
               cb(EARLY_UNDEFINED);
-            }
-            if (outEarlyState === null) {
-              log(`Received null interrupt, passing ${EARLY_NULL}`);
+            } else if (outEarlyState === null) {
+              log(`Received null interrupt, passing ${String(EARLY_NULL)}`);
               cb(EARLY_NULL);
             } else {
               log(`Received interrupt, passing ${outEarlyState}`);
@@ -136,10 +135,10 @@ function configure({debug = false}) {
             // we must pass that to the next reducer
             const outState = merge(result, nextState);
             if (outState === null) {
-              log(`Received null result, passing ${RESULT_NULL}`);
+              log(`Received null result, passing ${String(RESULT_NULL)}`);
               cb(null, RESULT_NULL);
             } else if (outState === RESULT_UNDEFINED) {
-              log(`Received undefined result, passing ${RESULT_UNDEFINED}`);
+              log(`Received undefined result, passing ${String(RESULT_UNDEFINED)}`);
               cb(null, RESULT_UNDEFINED);
             } else {
               log(`Received result, passing ${outState}`);
@@ -168,5 +167,10 @@ const pipeline = configure();
 
 export default pipeline;
 
-const debug = configure({debug: true});
-export { pipeline, debug, configure };
+const debugPipeline = configure({debug: true});
+export {
+  pipeline,
+  debugPipeline,
+  configure as configurePipeline,
+  normalizeArg // for testing
+};

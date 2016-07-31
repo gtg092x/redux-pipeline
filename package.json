@@ -41,9 +41,11 @@
     "url": "git://github.com/gtg092x/redux-pipeline.git"
   },
   "keywords": [
-    "forms",
+    "pipeline",
     "react",
-    "redux-collector"
+    "redux",
+    "redux-pipeline",
+    "reducers"
   ],
   "author": "gtg092x",
   "license": "MIT",
