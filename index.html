@@ -5,7 +5,7 @@ m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 
 ga('create', 'UA-44186754-4', 'auto');
 ga('send', 'pageview');
-</script><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#with-reducify">Reducify</a><a class="nav-link" href="#defaults">Defaults</a><a class="nav-link" href="#generic-reducers">Generics</a><a class="nav-link" href="#interrupt">Interrupt</a><a class="nav-link" href="#api">Api</a><a class="nav-link" href="#Credits">Credits</a><a class="nav-link github" href="https://github.com/gtg092x/redux-pipeline" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="mast-card"><span class="text">Run Reducers Together</span><pre><code class="language-js">pipeline(
+</script><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#with-reducify">Reducify</a><a class="nav-link" href="#defaults">Defaults</a><a class="nav-link" href="#generic-reducers">Generics</a><a class="nav-link" href="#pipe">Pipe</a><a class="nav-link" href="#api">Api</a><a class="nav-link" href="#Credits">Credits</a><a class="nav-link github" href="https://github.com/gtg092x/redux-pipeline" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="mast-card"><span class="text">Run Reducers Together</span><pre><code class="language-js">pipeline(
     reduce,
     reduceSomeMore
 )
@@ -223,15 +223,18 @@ store.dispatch({
 
 // State is: {myNumber: 10, myOtherNumber: -5}
 </code></pre>
-<h2 id="interrupt">Interrupt</h2>
+<h2 id="pipe">Pipe</h2>
+<p>Injected as the third argument into every reducer in the chain. <code>&lt;pipe&gt;</code> is an object with basic control flow methods. </p>
+<p><strong>Important!</strong> Make sure that you pass in your resulting state to any pipe methods you call. You must also return the method itself. Reducers are synchronous, we plan on keeping them that way.</p>
+<h3 id="end">End</h3>
 <p>You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions.</p>
 <pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
 
-function blockSubtract(state = 0, action, end) {
+function blockSubtract(state = 0, action, pipe) {
     switch(action.type) {        
         case &quot;SUBTRACT&quot;:
             // Notice we&#39;re passing state to the end method
-            return end(state);
+            return pipe.end(state);
         default:
             return state;
     }
@@ -270,6 +273,139 @@ store.dispatch({
 // State is: 10
 </code></pre>
 <p>Order matters! If you put an interrupting reducer last, it won&#39;t change anything about the final output.</p>
+<h3 id="skip">Skip</h3>
+<p><code>skip([state, [count = 1]])</code></p>
+<p>Skips the next reducer in the pipeline.</p>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function skipSubtract(state = 0, action, pipe) {
+    switch(action.type) {        
+        case &quot;SUBTRACT&quot;:
+            // Notice we&#39;re passing state to the end method
+            return pipe.skip(state);
+        default:
+            return state;
+    }
+}
+
+
+function mathReducer(state = 0, action) {
+    switch(action.type) {        
+        case &quot;SUBTRACT&quot;:
+            return state - action.data;
+        default:
+            return state;
+    }
+}
+
+// We&#39;ll get the multiplied subtraction instead
+function mathReducer2(state = 0, action) {
+    switch(action.type) {        
+        case &quot;SUBTRACT&quot;:
+            return state - action.data * 2;
+        default:
+            return state;
+    }
+}
+
+const store = createStore(
+  pipeline(
+    skipSubtract, 
+    mathReducer,
+    mathReducer2
+  )
+);
+
+store.dispatch({
+   type: &#39;SUBTRACT&#39;,
+   data: 5
+});
+
+// State is: -10
+</code></pre>
+<h3 id="mutate-action">Mutate Action</h3>
+<p><code>mutateAction([mutation, [state]])</code></p>
+<p>Mutates the action for the rest of the pipeline. This is not a control flow method. If you do not pass state, action will return <code>pipe</code>. Otherwise you must return the method result and pass in state.</p>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function incrementEnhancer(state = 0, action, pipe) {
+    switch(action.type) {        
+        case &quot;INCREMENT&quot;:            
+            return pipe.mutateAction({data: 2}, state);
+        default:
+            return state;
+    }
+}
+
+
+function increment(state = 0, action) {
+    switch(action.type) {        
+        case &quot;INCREMENT&quot;:
+            return state + action.data;
+        default:
+            return state;
+    }
+}
+
+
+const store = createStore(
+  pipeline(
+    incrementEnhancer, 
+    increment
+  )
+);
+
+store.dispatch({
+   type: &#39;INCREMENT&#39;
+});
+
+// State is: 2
+</code></pre>
+<p>You can chain this together if you do not pass a state result.</p>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function incrementEnhancer(state = 0, action, pipe) {
+    switch(action.type) {        
+        case &quot;INCREMENT&quot;:            
+            return pipe.mutateAction({data: 2}).skip(state);
+        default:
+            return state;
+    }
+}
+
+function incrementSkipThis(state = 0, action) {
+    switch(action.type) {        
+        case &quot;INCREMENT&quot;:
+            throw &#39;This reducer should not be used&#39;;
+        default:
+            return state;
+    }
+}
+
+function increment(state = 0, action) {
+    switch(action.type) {        
+        case &quot;INCREMENT&quot;:
+            return state + action.data;
+        default:
+            return state;
+    }
+}
+
+
+const store = createStore(
+  pipeline(
+    incrementEnhancer,
+    incrementSkipThis,
+    increment
+  )
+);
+
+store.dispatch({
+   type: &#39;INCREMENT&#39;
+});
+
+// State is: 2
+</code></pre>
 <h2 id="api">API</h2>
 <h3 id="pipeline">pipeline</h3>
 <pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
