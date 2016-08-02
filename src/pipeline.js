@@ -1,97 +1,56 @@
-import async from 'async';
+import reducify from 'reducify';
 import _ from 'lodash';
+
+function cleanArg(arg) {
+  if (!_.isArray(arg)) {
+    return arg;
+  }
+  return [undefined, ...arg];
+}
 
 // Signals used for control flow commands
 const EARLY = Symbol('EARLY');
-const EARLY_NULL = Symbol('EARLY_NULL');
-const EARLY_UNDEFINED = Symbol('EARLY_UNDEFINED');
 
-const mapDefaults = {
-  select: _.identity,
-  merge: _.identity
-};
+function configure({debug = false} = {}) {
+  const log = (...args) => debug === true ? console.log(...args) : _.noop;
+  /*
+   Merge reducers into a single reducer.
+   @params [reducerArgs] - arguments that are either functions or configuration objects
+   */
+  return function pipeline(...reducerArgs) {
+    // Normally unused in redux, this is to not hijack any functionality
+    const reducers = reducerArgs.map(arg => reducify(cleanArg(arg)));
 
-function propMap(key) {
-  return {
-    select(state) {
-      return state[key];
-    },
-    merge(result, state) {
-      return {
-        ...state,
-        [key]: result
+    // Returning a single reducer
+    return function pipelineReducer(state, action, ...restArgs) {
+      const context = this;
+      let nextState = state;
+
+      const end = (result) => {
+        nextState = result;
+        return EARLY;
       };
-    }
-  };
-}
 
-function normalizeArg(reducerArg) {
-  if (_.isArray(reducerArg)) {
-    if (reducerArg.length === 2 && _.isString(reducerArg[0]) && _.isFunction(reducerArg[1])) {
-      const [select, reducer] = reducerArg;
-      return normalizeArg({select, reducer});
-    } else if (reducerArg.length === 3 && _.isFunction(reducerArg[0]) && _.isFunction(reducerArg[1]) && _.isFunction(reducerArg[2])) {
-      const [select, merge, reducer] = reducerArg;
-      return normalizeArg({select, merge, reducer});
-    }
-  }
-  if (_.isFunction(reducerArg)) {
-    return {...mapDefaults, reducer: reducerArg};
-  }
-  if (_.isString(reducerArg.select)) {
-    return {...mapDefaults, ...propMap(reducerArg.select), reducer: reducerArg.reducer};
-  }
-  if (reducerArg.reducer === undefined || !_.isFunction(reducerArg.reducer)) {
-    return {...mapDefaults, reducer: (state = reducerArg) => state};
-  }
-  return {...mapDefaults, ...reducerArg};
-}
-
-function pipeline(...reducers) {
-  const context = this;
-  return (state, action) => {
-    let output;
-    async.waterfall(reducers.map(reducerArg => {
-
-      const {reducer, select, merge} = normalizeArg(reducerArg);
-
-      return (...args) => {
-        const cb = args.pop();
-        const nextState = args.pop() || state;
-        const nextStateFragment = select(nextState);
-
-        const bail = (earlyState) => {
-
-          const outEarlyState = merge(earlyState, nextState);
-          if (outEarlyState === undefined) {
-            cb(EARLY_UNDEFINED);
-          }
-          if (outEarlyState === null) {
-            cb(EARLY_NULL);
-          } else {
-            cb(outEarlyState);
-          }
-          return EARLY;
-
-        };
-        const result = reducer.call(context, nextStateFragment, action, bail);
-
-        if (result !== EARLY) {
-          const outState = merge(result, nextState);
-          cb(null, outState);
+      // Reducify does most of the work for us
+      for (let i = 0; i < reducers.length; i ++) {
+        const result = reducers[i].call(context, nextState, action, end, ...restArgs);
+        if (result === EARLY) {
+          break;
         }
+        nextState = result;
       }
-    }), (early, result) => {
-      output = (early === undefined || early === null) ? result : early;
-      if (output === EARLY_UNDEFINED) {
-        output = undefined;
-      }
-      if (output === EARLY_NULL) {
-        output = null;
-      }
-    });
-    return output;
-  };
+      return nextState;
+    };
+  }
 }
+
+const pipeline = configure();
 
 export default pipeline;
+
+const debugPipeline = configure({debug: true});
+export {
+  pipeline,
+  debugPipeline,
+  configure as configurePipeline,
+};
