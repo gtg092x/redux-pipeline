@@ -1,65 +1,159 @@
-.app {
-	min-height: 100vh;
-	background-color: #fbfbfb;
-}
-.layout {
-	margin: 15px auto 0;
-}
-
-form label {
-	display: block;
+.gradient (@startColor: #eee, @endColor: white) {
+	background-color: @startColor;
+	background: -webkit-gradient(linear, left top, left bottom, from(@startColor), to(@endColor));
+	background: -webkit-linear-gradient(top, @startColor, @endColor);
+	background: -moz-linear-gradient(top, @startColor, @endColor);
+	background: -ms-linear-gradient(top, @startColor, @endColor);
+	background: -o-linear-gradient(top, @startColor, @endColor);
 }
 
-.example, .example-code {
-	margin: 16px 0;
+// --------------------------------------------------
+// Flexbox LESS mixins
+// The spec: http://www.w3.org/TR/css3-flexbox
+// --------------------------------------------------
+
+// Flexbox display
+// flex or inline-flex
+.flex-display(@display: flex) {
+	display: ~"-webkit-@{display}";
+	display: ~"-ms-@{display}box"; // IE10 uses -ms-flexbox
+	display: ~"-ms-@{display}"; // IE11
+	display: @display;
 }
 
-.example .example-container h3 {
-	border-bottom: solid 1px rgba(0, 0, 0, .12);
-	padding-bottom: .25em;
-	margin-bottom: .75em;
+// The 'flex' shorthand
+// - applies to: flex items
+// <positive-number>, initial, auto, or none
+.flex(@columns: initial) {
+	-webkit-flex: @columns;
+	-ms-flex: @columns;
+	flex: @columns;
 }
 
-.example form, .example pre {
-	margin: 8px 0;
+// Flex Flow Direction
+// - applies to: flex containers
+// row | row-reverse | column | column-reverse
+.flex-direction(@direction: row) {
+	-webkit-flex-direction: @direction;
+	-ms-flex-direction: @direction;
+	flex-direction: @direction;
 }
 
-h2 {
-	color: rgba(0, 0, 0, .57);
-	font-size: 26pt;
+// Flex Line Wrapping
+// - applies to: flex containers
+// nowrap | wrap | wrap-reverse
+.flex-wrap(@wrap: nowrap) {
+	-webkit-flex-wrap: @wrap;
+	-ms-flex-wrap: @wrap;
+	flex-wrap: @wrap;
 }
 
-.container-group {
-
-	padding-bototm: 15px;
+// Flex Direction and Wrap
+// - applies to: flex containers
+// <flex-direction> || <flex-wrap>
+.flex-flow(@flow) {
+	-webkit-flex-flow: @flow;
+	-ms-flex-flow: @flow;
+	flex-flow: @flow;
 }
 
-.navbar {
-	padding: 0;
-	border-radius: 0;
+// Display Order
+// - applies to: flex items
+// <integer>
+.flex-order(@order: 0) {
+	-webkit-order: @order;
+	-ms-order: @order;
+	order: @order;
 }
 
-.card {
-	background-color: #fff;
+// Flex grow factor
+// - applies to: flex items
+// <number>
+.flex-grow(@grow: 0) {
+	-webkit-flex-grow: @grow;
+	-ms-flex-grow: @grow;
+	flex-grow: @grow;
 }
 
-.card-title {
-	margin-bottom: 0;
-	background-color: #373a3c;
-	color: #fff;
+// Flex shrink
+// - applies to: flex item shrink factor
+// <number>
+.flex-shrink(@shrink: 1) {
+	-webkit-flex-shrink: @shrink;
+	-ms-flex-shrink: @shrink;
+	flex-shrink: @shrink;
 }
 
-.card-title p {
-	margin-bottom: 0;
+// Flex basis
+// - the initial main size of the flex item
+// - applies to: flex itemsnitial main size of the flex item
+// <width>
+.flex-basis(@width: auto) {
+	-webkit-flex-basis: @width;
+	-ms-flex-basis: @width;
+	flex-basis: @width;
 }
 
-pre {
-	border: solid 2px rgba(215, 215, 215, .27);
-	background-color: #efefef;
-	padding: 24px;
-	white-space: pre-wrap;
+// Axis Alignment
+// - applies to: flex containers
+// flex-start | flex-end | center | space-between | space-around
+.justify-content(@justify: flex-start) {
+	-webkit-justify-content: @justify;
+	-ms-justify-content: @justify;
+	justify-content: @justify;
 }
 
-.has-error {
-	color: #fc8c84;
+// Packing Flex Lines
+// - applies to: multi-line flex containers
+// flex-start | flex-end | center | space-between | space-around | stretch
+.align-content(@align: stretch) {
+	-webkit-align-content: @align;
+	-ms-align-content: @align;
+	align-content: @align;
+}
+
+// Cross-axis Alignment
+// - applies to: flex containers
+// flex-start | flex-end | center | baseline | stretch
+.align-items(@align: stretch) {
+	-webkit-align-items: @align;
+	-ms-align-items: @align;
+	align-items: @align;
+}
+
+// Cross-axis Alignment
+// - applies to: flex items
+// auto | flex-start | flex-end | center | baseline | stretch
+.align-self(@align: auto) {
+	-webkit-align-self: @align;
+	-ms-align-self: @align;
+	align-self: @align;
+}
+
+.transform(...){
+	-webkit-transform: @arguments;
+	-moz-transform: @arguments;
+	-ms-transform: @arguments;
+	-o-transform: @arguments;
+	transform: @arguments;
+}
+
+.transform-origin(...){
+	-webkit-transform-origin: @arguments;
+	-moz-transform-origin: @arguments;
+	-ms-transform-origin: @arguments;
+	-o-transform-origin: @arguments;
+	transform-origin: @arguments;
+}
+
+.keyframes(@name; @arguments) {
+	@-moz-keyframes @name { @arguments(); }
+	@-webkit-keyframes @name { @arguments(); }
+	@keyframes @name { @arguments(); }
+}
+
+.animation (@name) {
+	-webkit-animation: @name;
+	-moz-animation:    @name;
+	-ms-animation:     @name;
 }

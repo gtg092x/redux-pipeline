@@ -1,8 +1,174 @@
 .ghpage(@maincolor, @altcolor) {
+  @text-color: fade(contrast(@bg-color), 87%);
   .hero {
     background-color: @maincolor;
   }
   body {
     background-color: @altcolor;
   }
+
+  .keyframes(fly-into-sun;{
+    0% { .transform(translateX(-100%)); opacity: 0;}
+    12% { .transform(translateX(0%)); opacity: 1;}
+    20% {opacity: 1;}
+    25% { .transform(translateX(100%)); opacity: 0;}
+    100% { opacity: 0;}
+  });
+
+  .keyframes(spin;{
+    0% { .transform(rotate(0deg));}
+    25% { .transform(rotate(90deg));}
+    50% { .transform(rotate(180deg));}
+    75% { .transform(rotate(270deg));}
+    100% { .transform(rotate(360deg));}
+  });
+
+  .keyframes(woo;{
+    0% { .transform(rotate(45deg));}
+    40% { .transform(rotate(135deg));}
+    100% { .transform(rotate(135deg));}
+  });
+
+  .keyframes(woo-alt;{
+    0% { .transform(rotate(315deg));}
+    40% { .transform(rotate(235deg));}
+    100% { .transform(rotate(235deg));}
+  });
+
+  .keyframes(fade-in;{
+    0% { opacity: 0;}
+    50% { opacity: 0;}
+    100% { opacity: 1;}
+  });
+
+
+  .navbar-light .navbar-nav .nav-link {
+    color: fade(black, 87%);
+  }
+
+  .navbar-nav {
+    vertical-align: middle;
+  }
+
+  .navbar-nav .nav-link {
+    vertical-align: middle;
+    display: inline-block;
+    float: none;
+    &.github {
+      float: right;
+      position: relative;
+      top: 0px;
+      .fa {
+        position: relative;
+        left: -4px;
+      }
+    }
+  }
+  .navbar-brand {
+    float: none;
+  }
+
+  @bg-color: @maincolor;
+  .masthead {
+    text-align: center;
+    height: 40vh;
+    margin-bottom: 40px;
+    min-height: 300px;
+    background-color: @bg-color;
+    .gradient(@bg-color, darken(@bg-color, 10%));
+
+    color: @text-color;
+
+
+    .container {
+      height: 100%;
+      .flex-display();
+      .flex-direction(column);
+      .justify-content(center);
+      .align-items(center);
+
+      .mast-card {
+        display: inline-block;
+        border: solid 4px @text-color;
+        border-radius: 10px;
+      }
+
+      .text {
+        padding: 15px;
+        display: inline-block;
+        & + pre {
+          margin-top: 0;
+        }
+      }
+
+      pre {
+        background-color: @text-color;
+        color: @maincolor;
+        padding: 16px;
+        margin-top: 10px;
+        font-size: 14pt;
+        line-height: 1.2em;
+        text-align: left;
+        margin-bottom: 0;
+        code {
+          .token.operator {
+            background: transparent;
+          }
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+
+    }
+  }
+  pre {
+    white-space: pre-wrap;
+  }
+  #readme {
+    pre {
+      background-color: #efefef;
+      border: solid 1px darken(#efefef, 10%);
+      padding: 10px;
+      border-radius: 4px;
+      code {
+        font-family: Courier, monospace;
+      }
+      margin-bottom: 18px;
+    }
+    p code {
+      background-color: #efefef;
+      border: solid 1px darken(#efefef, 10%);
+      padding: 4px;
+      margin: 0 4px;
+      border-radius: 4px;
+      font-family: Courier, monospace;
+    }
+    h1, h2, h3 {
+      padding-top: 1.5em;
+    }
+    h1, h2 {
+      border-bottom: solid 1px fade(@maincolor, 27%);
+    }
+  }
+
+  blockquote {
+    background: #f9f9f9;
+    border-left: 10px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    quotes: "\201C" "\201D" "\2018" "\2019";
+  }
+  blockquote:before {
+    color: #ccc;
+    content: open-quote;
+    font-size: 4em;
+    line-height: 0.1em;
+    margin-right: 0.25em;
+    vertical-align: -0.4em;
+  }
+  blockquote p {
+    display: inline;
+  }
+
+
 }

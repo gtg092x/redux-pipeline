@@ -1,15 +1,24 @@
-<!DOCTYPE html><html lang="en"><head><title>Composite reducer tool</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><link href="./ghpage.css" rel="stylesheet"><script src="https://use.fontawesome.com/9237579915.js"></script><meta charset="UTF-8"></head><body><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#native">Native</a><a class="nav-link" href="#validation">Customization</a><a class="nav-link" href="examples/web/">Examples</a><a class="nav-link github" href="https://github.com/gtg092x/redux-pipeline" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="text">Put this in your pipe and reduce it</span></h1><div id="example"></div></div><div class="container" id="readme"><h1 id="redux-pipeline">Redux Pipeline</h1>
-<p>Merge <a href="https://github.com/reactjs/redux">Redux</a> reducers together to make one composite reducer.</p>
-<p><a href="http://code.mediadrake.com/redux-pipeline">http://code.mediadrake.com/redux-pipeline</a></p>
+<!DOCTYPE html><html lang="en"><head><title>Redux Pipeline | Run Reducers Together</title><link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"><link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css" rel="stylesheet"><link href="./ghpage.css" rel="stylesheet"><script src="https://use.fontawesome.com/9237579915.js"></script><meta charset="UTF-8"></head><body><script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject'] = r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-44186754-4', 'auto');
+ga('send', 'pageview');
+
+
+</script><div id="root"><div class="nav nav-inline navbar-light bg-faded"><nav class="container navbar-nav"><a class="nav-link" href="#installation">Install</a><a class="nav-link" href="#usage">Usage</a><a class="nav-link" href="#with-reducify">Reducify</a><a class="nav-link" href="#defaults">Defaults</a><a class="nav-link" href="#generic-reducers">Generics</a><a class="nav-link" href="#interrupt">Interrupt</a><a class="nav-link" href="#api">Api</a><a class="nav-link" href="#Credits">Credits</a><a class="nav-link github" href="https://github.com/gtg092x/redux-pipeline" target="_blank"><span class="fa fa-github"></span>Github</a></nav></div><div class="masthead"><h1 class="container"><span class="mast-card"><span class="text">Run Reducers Together</span><pre><code class="language-js">pipeline(
+    reduce,
+    reduceSomeMore
+)
+</code></pre></span></h1><div id="example"></div></div><div class="container" id="readme"><h1 id="reducify-build-status-https-travis-ci-org-gtg092x-redux-pipeline-svg-branch-master-https-travis-ci-org-gtg092x-redux-pipeline-">Reducify <a href="https://travis-ci.org/gtg092x/redux-pipeline"><img src="https://travis-ci.org/gtg092x/redux-pipeline.svg?branch=master" alt="Build Status"></a></h1>
+<p>Run <a href="https://github.com/reactjs/redux">Redux</a> Reducers Together.</p>
+<p><a href="https://nodei.co/npm/redux-pipeline/"><img src="https://nodei.co/npm/redux-pipeline.png?downloads=true&amp;stars=true" alt="NPM"></a></p>
+<p><a href="http://redux-pipeline.mediadrake.com/">http://redux-pipeline.mediadrake.com/</a></p>
 <h2 id="installation">Installation</h2>
 <pre><code>% npm install redux-pipeline
 </code></pre><h2 id="usage">Usage</h2>
-<h3 id="redux-pipeline-combines-reducers-into-a-single-manageable-sequence">Redux pipeline combines reducers into a single, manageable sequence</h3>
-<p>Tired of massive, unwieldly switch statements? Wish you could break up reducers into re-usable and configurable parts?</p>
-<blockquote>
-<p>Yes, this problem is literally ruining my life.</p>
-</blockquote>
-<p>We thought so. With redux-pipeline you can chain reducers together and get back to worrying about application logic instead of how tired you are from javascript fatigue.</p>
+<p>Redux pipeline combines reducers into a single, manageable sequence.</p>
 <h4 id="mystore-js">MyStore.js</h4>
 <pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
 import pipeline from &#39;redux-pipeline&#39;;
@@ -56,43 +65,67 @@ dispatch({
 });
 // State is: -8
 </code></pre>
-<h2 id="advanced-features">Advanced Features</h2>
-<blockquote>
-<p>That&#39;s boring, can&#39;t this thing do anything that&#39;s cool?</p>
-</blockquote>
-<p>It can! Let&#39;s check out some more advanced stuff.</p>
-<h3 id="namespacing">Namespacing</h3>
-<p>You might want to apply a reducer to a single state key. Well that&#39;s easy as pie.</p>
+<h2 id="with-reducify">With Reducify</h2>
+<p>The above reducers can actually be a whole lot shorter.</p>
 <pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
 import pipeline from &#39;redux-pipeline&#39;;
 
-// If you&#39;re going to namespace, make sure your state is an object!
-function rootReducer(state = {myNumber: 0, myBoolean: false}, action) {
-    return state;
+export default createStore(
+  pipeline(
+    {&quot;ADD&quot;: (state = 0, action) =&gt; state + action.data}, 
+    {&quot;SUBTRACT&quot;: (state = 0, action) =&gt; state - action.data}}
+  )
+);
+</code></pre>
+<p>This is courtesy of <a href="http://reducify.mediadrake.com">Reducify</a>. Head over to their documentation and check out all the ways you can make reducers. Any argument you pass to pipeline gets automatically passed to reducify.</p>
+<p><strong>Note!</strong> We do have one big change between the API for <a href="http://reducify.mediadrake.com">Reducify</a> and Redux Pipeline - arrays will get parsed like this:</p>
+<p><code>[[select, merge], reducer]</code></p>
+<p>Notice we&#39;re not pulling a default value from the array! Use an earlier step in the pipeline for that.</p>
+<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+
+function reducer1(state = 0, action) {
+    // ...
 }
 
+function reducer2(state = 0, action) {
+    // ...
+}
+
+// Works
+export default createStore(
+  pipeline(
+    {paramOne: 1},
+    [&#39;paramOne&#39;, reducer1], 
+    [state =&gt; state.paramTwo, (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2]
+  )
+);
+
+// Does not work
+export default createStore(
+  pipeline(    
+    [{paramOne: 1}, &#39;paramOne&#39;, reducer1], 
+    [state =&gt; state.paramTwo, (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2]
+  )
+);
+</code></pre>
+<h2 id="defaults">Defaults</h2>
+<p>Just pass it in instead of a reducer. They&#39;ll turn into a reducify static reducer and you can keep on going.</p>
+<pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
+import pipeline from &#39;redux-pipeline&#39;;
+
 function mathReducer(state = 0, action) {
-    switch(action.type) {
-        case &quot;ADD&quot;:
-            return state + action.data;
-        default:
-            return state;
-    }
+    // ...
 }
 
 function toggleReducer(state = false, action) {
-    switch(action.type) {
-        case &quot;TOGGLE&quot;:
-            return !state;
-        default:
-            return state;
-    }    
+    // ...
 }
 
 const store = createStore(
   pipeline(
-    rootReducer,    
-    {select: &#39;myNumber&#39;, reducer: mathReducer}, // identical to [&#39;myNumber&#39;, mathReducer]
+    {myNumber: 0, myBoolean: false}, // Just pass in an object - this will be your default state
+    {select: &#39;myNumber&#39;, reducer: mathReducer},
     {select: &#39;myBoolean&#39;, reducer: toggleReducer}
   )
 );
@@ -108,48 +141,7 @@ store.dispatch({
 
 // State is: {myNumber: 10, myBoolean: true}
 </code></pre>
-<p>Alternatively, you can pass in select and merge methods. The following would be identical to the pipeline above:</p>
-<pre><code class="lang-js">export default createStore(
-  pipeline(
-    rootReducer,    
-    {select: state =&gt; state.myBoolean, merge: (result, state) =&gt; ({...state, myBoolean: result}), reducer: toggleReducer}, // alternatively you can call [state =&gt; state.myBoolean, (result, state) =&gt; ({...state, myBoolean: result}), toggleReducer]
-    {select: state =&gt; state.myNumber, merge: (result, state) =&gt; ({...state, myNumber: result}), reducer: mathReducer}
-  )
-);
-</code></pre>
-<h3 id="defaults">Defaults</h3>
-<p>If you&#39;re heavy into namespacing, defaults are a pain - just pass it in instead of a reducer.</p>
-<pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
-import pipeline from &#39;redux-pipeline&#39;;
-
-function mathReducer(state = 0, action) {
-    // ...
-}
-
-function toggleReducer(state = false, action) {
-    // ...
-}
-
-const store = createStore(
-  pipeline(
-    {foo: &#39;bar&#39;}, // Just pass in an object - this will be your default state
-    {select: &#39;myNumber&#39;, reducer: mathReducer},
-    {select: &#39;myBoolean&#39;, reducer: toggleReducer}
-  )
-);
-
-store.dispatch({
-   type: &#39;ADD&#39;,
-   data: 10
-});
-
-store.dispatch({
-   type: &#39;TOGGLE&#39;
-});
-
-// State is: {myNumber: 10, myBoolean: true, foo: &#39;bar&#39;}
-</code></pre>
-<h3 id="nesting">Nesting</h3>
+<h2 id="nesting">Nesting</h2>
 <p>Because we&#39;re just making reducers, you&#39;re free to do pipe all the way down!</p>
 <pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
 import pipeline from &#39;redux-pipeline&#39;;
@@ -188,14 +180,14 @@ store.dispatch({
 });
 
 /* 
-    State is:
-    {
-        data: {myNumber: 10, myBoolean: true},
-        otherData: {myNumber: 10, myBoolean: true}
-    }
+State is:
+{
+    data: {myNumber: 10, myBoolean: true},
+    otherData: {myNumber: 10, myBoolean: true}
+}
 */
 </code></pre>
-<h3 id="configurable-reducers">Configurable Reducers</h3>
+<h2 id="generic-reducers">Generic Reducers</h2>
 <p>Not something you absolutely need this package for, but it makes this pattern a whole lot easier.</p>
 <pre><code class="lang-js">import { createStore } from &#39;redux&#39;;
 import pipeline from &#39;redux-pipeline&#39;;
@@ -233,9 +225,19 @@ store.dispatch({
 
 // State is: {myNumber: 10, myOtherNumber: -5}
 </code></pre>
-<h3 id="interrupt">Interrupt</h3>
-<p>You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions. There&#39;s actually a way to do this.</p>
+<h2 id="interrupt">Interrupt</h2>
+<p>You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions.</p>
 <pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
+
+function blockSubtract(state = 0, action, end) {
+    switch(action.type) {        
+        case &quot;SUBTRACT&quot;:
+            // Notice we&#39;re passing state to the end method
+            return end(state);
+        default:
+            return state;
+    }
+}
 
 // Math reducer would come from a library or something
 function mathReducer(state = 0, action) {
@@ -244,16 +246,6 @@ function mathReducer(state = 0, action) {
             return state + action.data;
         case &quot;SUBTRACT&quot;:
             return state - action.data;
-        default:
-            return state;
-    }
-}
-
-function blockSubtract(state = 0, action, end) {
-    switch(action.type) {        
-        case &quot;SUBTRACT&quot;:
-            // Notice we&#39;re passing state to the end method
-            return end(state);
         default:
             return state;
     }
@@ -279,94 +271,12 @@ store.dispatch({
 
 // State is: 10
 </code></pre>
-<p>Order matters! If you put an interrupting reducer last, it won&#39;t change anything because we&#39;re doing them in order.</p>
-<p>Right now end is just a killswitch. If there&#39;s a need for finer controls with it. File an issue.</p>
+<p>Order matters! If you put an interrupting reducer last, it won&#39;t change anything about the final output.</p>
 <h2 id="api">API</h2>
 <h3 id="pipeline">pipeline</h3>
 <pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
 pipeline([steps ...]);
 </code></pre>
-<p>There&#39;s only one function, but it&#39;s got a few different ways to send args in. Let&#39;s look at them all.</p>
-<h4 id="functions">Functions</h4>
-<pre><code class="lang-js">pipeline([&lt;Function&gt;...]);
-</code></pre>
-<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
-
-function reducer1(state = 0, action) {
-    // ...
-}
-
-function reducer2(state = 0, action) {
-    // ...
-}
-
-export default createStore(
-  pipeline(reducer1, reducer2)
-);
-// State is: Number
-</code></pre>
-<p>Just take any regular old reducer and pass it in. You can do one reducer or you can do 100.</p>
-<h4 id="object-configs">Object Configs</h4>
-<pre><code class="lang-js">pipeline([{select&lt;string&gt;, reducer&lt;Function&gt;}...]);
-// or
-pipeline([{select&lt;Function&gt;, merge&lt;Function&gt;, reducer&lt;Function&gt;}...]);
-// don&#39;t be afraid to mix them together either
-pipeline({select&lt;Function&gt;, merge&lt;Function&gt;, reducer&lt;Function&gt;}, {select&lt;string&gt;, reducer&lt;Function&gt;}, &lt;Function&gt;);
-</code></pre>
-<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
-
-function rootReducer(state = {}, action) {
-    return state;
-}
-
-function reducer1(state = 0, action) {
-    // ...
-}
-
-function reducer2(state = 0, action) {
-    // ...
-}
-
-export default createStore(
-  pipeline(
-    rootReducer,
-    {select: &#39;paramOne&#39; ,reducer: reducer1}, 
-    {select: state =&gt; state.paramTwo, merge: (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2}
-  )
-);
-// State is: {paramOne&lt;Number&gt;, paramTwo&lt;Number&gt;}
-</code></pre>
-<p>If your reducer is changing keys on an object, make sure you have a root reducer or a default value! Look at the <code>select</code> example above if this seems crazy.</p>
-<h4 id="arrays">Arrays</h4>
-<pre><code class="lang-js">pipeline([[&lt;string&gt;, &lt;Function&gt;]...]); // identical to {select&lt;string&gt;, reducer&lt;Function&gt;}
-// or
-pipeline([[&lt;Function&gt;, &lt;Function&gt;, &lt;Function&gt;]...]); // identical to {select&lt;Function&gt;, merge&lt;Function&gt;, reducer&lt;Function&gt;}
-// you can mix these together too
-</code></pre>
-<pre><code class="lang-js">import pipeline from &#39;redux-pipeline&#39;;
-
-function rootReducer(state = {}, action) {
-    return state;
-}
-
-function reducer1(state = 0, action) {
-    // ...
-}
-
-function reducer2(state = 0, action) {
-    // ...
-}
-
-export default createStore(
-  pipeline(
-    rootReducer,
-    [&#39;paramOne&#39;, reducer1], 
-    [state =&gt; state.paramTwo, (result, state) =&gt; ({...state, paramTwo: result}), reducer: reducer2]
-  )
-);
-// State is: {paramOne&lt;Number&gt;, paramTwo&lt;Number&gt;}
-</code></pre>
-<p>This really just maps the array to the configs above. It gets pretty useful if you&#39;re nesting reducers.</p>
 <h4 id="defaults">Defaults</h4>
 <pre><code class="lang-js">pipeline([&lt;Object&gt;...]); // identical to (state = &lt;Object&gt;) =&gt; state
 </code></pre>
@@ -390,16 +300,11 @@ export default createStore(
 );
 // State is: {paramOne&lt;Number&gt;, paramTwo&lt;Number&gt;, foo: &#39;bar&#39;}
 </code></pre>
-<p>Of course, if you decide to have a reducer with default values that include a string named <code>select</code> and a function named <code>reducer</code>, this obviously won&#39;t work. But let&#39;s be honest, that sounds like a silly thing to do. </p>
-<p>If you find yourself in that situation, just use a root reducer that sets those defaults instead - more boilerplate for you.</p>
-<h2 id="native">Native</h2>
-<h3 id="this-works-with-react-native-too">This works with React Native too</h3>
-<p>Nothing special - use it like any other redux package. Check the examples if you don&#39;t believe me.</p>
-<h2 id="combine-stores">Combine Stores</h2>
-<blockquote>
-<p>Do I have to do anything special to use <code>combineStores</code>?</p>
-</blockquote>
-<p>No - these are just reducers after all.</p>
+<h3 id="debugpipeline">debugPipeline</h3>
+<pre><code class="lang-js">import {debugPipeline} from &#39;redux-pipeline&#39;;
+pipeline([steps ...]);
+</code></pre>
+<p>Same as the default pipeline function, just with a lot of console noise.</p>
 <h2 id="credits">Credits</h2>
 <p>Redux Pipeline is free software under the MIT license. It was created in sunny Santa Monica by <a href="http://www.mediadrake.com">Matthew Drake</a>.</p>
-</div></div><script src="./examples/web/js/ghpage.js"></script><script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script><script>$('a[href="http://code.mediadrake.com/redux-pipeline"]').remove();</script></body></html>
+</div></div><script src="./examples/web/js/ghpage.js"></script><script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/js/bootstrap.min.js" integrity="sha384-vZ2WRJMwsjRMW/8U7i6PWi6AlO1L79snBrmgiDpgIWJ82z8eA5lenwvxbMV1PAh7" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/components/prism-javascript.min.js"></script><script>$('a[href="http://redux-pipeline.mediadrake.com/"]').remove();</script></body></html>

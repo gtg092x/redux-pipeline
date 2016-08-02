@@ -25,14 +25,7 @@ export default function () {
             return state;
         }
       },
-      (state = 0, action) => {
-        switch (action.type) {
-          case "SUBTRACT":
-            return state - action.data;
-          default:
-            return state;
-        }
-      }
+      {"SUBTRACT": (state = 0, action) => state - action.data}
     );
 
     it('should be a function', function () {
@@ -43,7 +36,7 @@ export default function () {
       assert.equal(state, pipelineResult(state, {}));
       assert.equal(state, pipelineResult(state, {data: 4}));
     });
-    it('should support both dispatch types', function () {
+    it('should support multiple dispatch types', function () {
       const state = 10;
 
       const toAdd = 4;
@@ -53,17 +46,6 @@ export default function () {
       assert.equal(state - toSubtract, pipelineResult(state, {type: 'SUBTRACT', data: toSubtract}));
     });
 
-    it('should be stateless', function () {
-      const state = 10;
-
-      const toAdd = 4;
-      const addAction = {type: 'ADD', data: toAdd};
-      assert.equal(state + toAdd + toAdd, pipelineResult(pipelineResult(state, addAction), addAction));
-
-      const toSubtract = 4;
-      const subAction = {type: 'SUBTRACT', data: toSubtract};
-      assert.equal(state - toSubtract - toSubtract, pipelineResult(pipelineResult(state, subAction), subAction));
-    });
   });
 
   describe('selects', function () {
@@ -98,13 +80,13 @@ export default function () {
         select: 'addKey2',
         reducer: addReducer
       },
-      {
-        select: (state) => state.addKey3,
-        merge: (result, state) => {
+      [
+        (state) => state.addKey3,
+        (result, state) => {
           return ({...state, addKey3: result});
         },
-        reducer: addReducer
-      },
+        addReducer
+      ],
       [
         'mixedKey',
         subtractReducer
@@ -114,12 +96,8 @@ export default function () {
     it('should be a function', function () {
       assert.isFunction(pipelineResult);
     });
-    it('should act as identity if no type or action passed  - defaults are injected', function () {
-      const state = {mixedKey: 0, addKey2: 0, addKey3: 0};
-      assert.deepEqual(state, pipelineResult(state, {}));
-      assert.deepEqual(state, pipelineResult(state, {data: 4}));
-    });
-    it('should apply reducers to all keys', function () {
+
+    it('should apply reducers to all configured keys', function () {
 
       const state = {
         'mixedKey': 10, 'addKey2': 2, 'addKey3': 8
@@ -130,7 +108,7 @@ export default function () {
 
     });
 
-    it('should apply subtract to only addKey1', function () {
+    it('should not apply reducers non configured keys', function () {
 
       const state = {
         'mixedKey': 10, 'addKey2': 2, 'addKey3': 8
@@ -148,9 +126,12 @@ export default function () {
         'mixedKey': 10, 'addKey2': 2, 'addKey3': 8
       };
 
+      const stateCopy = _.cloneDeep(state);
+
       const toAdd = 4;
       const action = {type: 'ADD', data: toAdd};
-      assert.deepEqual(mapObject(state, val => val + toAdd + toAdd), pipelineResult(pipelineResult(state, action), action));
+      pipelineResult(state, action);
+      assert.deepEqual(state, stateCopy);
     });
   });
 
@@ -244,25 +225,14 @@ export default function () {
     it('should be stateless', function () {
       const toAdd = 10;
       const action = {type: 'ADD', data: toAdd};
-      const result = pipelineResult(pipelineResult(state, action), action);
+      const stateCopy = _.cloneDeep(state);
+      pipelineResult(state, action);
 
-      assert.equal(state.addKey1 + toAdd + toAdd, result.addKey1);
-      assert.equal(state.addKey2.data + toAdd + toAdd, result.addKey2.data);
+
+      assert.deepEqual(state, stateCopy);
     });
   });
 
-  describe('defaults', function () {
-
-    const arg = {foo: 'bar'};
-    const pipelineResult = pipeline(arg, _.identity);
-
-    it('should be a function', function () {
-      assert.isFunction(pipelineResult);
-    });
-    it('should return the default value', function () {
-      assert.deepEqual(pipelineResult(), arg);
-    });
-  });
 
   describe('interrupt', function () {
 
