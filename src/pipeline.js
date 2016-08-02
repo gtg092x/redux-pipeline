@@ -10,6 +10,8 @@ function cleanArg(arg) {
 
 // Signals used for control flow commands
 const EARLY = Symbol('EARLY');
+const SKIP = Symbol('SKIP');
+const NEXT = Symbol('NEXT');
 
 function configure({debug = false} = {}) {
   const log = (...args) => debug === true ? console.log(...args) : _.noop;
@@ -25,17 +27,42 @@ function configure({debug = false} = {}) {
     return function pipelineReducer(state, action, ...restArgs) {
       const context = this;
       let nextState = state;
+      let nextAction = action;
+      let skipCount = 1;
 
-      const end = (result) => {
-        nextState = result;
-        return EARLY;
+
+      const pipe = {
+        end(result) {
+          nextState = result;
+          return EARLY;
+        },
+        skip(result, toSkip = 1) {
+          nextState = result;
+          skipCount = toSkip;
+          return SKIP;
+        },
+        mutateAction(mutation, ...args) {
+          nextAction = _.isFunction(mutation) ? mutation(nextAction) : {...nextAction, ...mutation};
+          if (args.length > 0) {
+            nextState = args[0];
+            return NEXT;
+          }
+          return pipe;
+        }
       };
 
       // Reducify does most of the work for us
       for (let i = 0; i < reducers.length; i ++) {
-        const result = reducers[i].call(context, nextState, action, end, ...restArgs);
+        const result = reducers[i].call(context, nextState, nextAction, pipe, ...restArgs);
         if (result === EARLY) {
           break;
+        }
+        if (result === NEXT) {
+          continue;
+        }
+        if (result === SKIP) {
+          i += skipCount;
+          continue;
         }
         nextState = result;
       }

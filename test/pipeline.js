@@ -240,7 +240,7 @@ export default function () {
       (state = 0) => {
         return state;
       },
-      (state = 0, action, end) => {
+      (state = 0, action, {end}) => {
         switch (action.type) {
           case "NULL":
             return end(null);
@@ -274,5 +274,197 @@ export default function () {
       const toAdd = 10;
       assert.equal(toAdd, pipelineResult(0, {type: 'ADD', data: toAdd}))
     });
+  });
+
+  describe('action', function () {
+
+    const pipelineResult = pipeline(
+      (state = 0) => {
+        return state;
+      },
+      (state = 0, action, {mutateAction}) => {
+        switch (action.type) {
+          case "NULL":
+            return mutateAction({data: 2}, null);
+          case "UNDEFINED":
+            return mutateAction({data: 2}, undefined);
+          case "ADD":
+            return mutateAction({data: 2}, state + action.data);
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            return action.data;
+          default:
+            return state;
+        }
+      }
+    );
+
+    it('should support undefined', function () {
+      assert.equal(2, pipelineResult(0, {type: 'UNDEFINED'}))
+    });
+    it('should support null', function () {
+      assert.equal(2, pipelineResult(0, {type: 'NULL'}))
+    });
+    it('should support commands', function () {
+      const toAdd = 10;
+      assert.equal(2, pipelineResult(0, {type: 'ADD', data: toAdd}))
+    });
+
+
+    const pipelineResult2 = pipeline(
+      (state = 0) => {
+        return state;
+      },
+      (state = 0, action, {mutateAction}) => {
+        switch (action.type) {
+          case "NULL":
+            return mutateAction({data: 2}).end(null);
+          case "UNDEFINED":
+            return mutateAction({data: 2}).end(undefined);
+          case "ADD":
+            return mutateAction({data: 2}).end(state + action.data);
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            return action.data;
+          default:
+            return state;
+        }
+      }
+    );
+
+    it('should chain support undefined', function () {
+      assert.equal(undefined, pipelineResult2(0, {type: 'UNDEFINED'}))
+    });
+    it('should chain support null', function () {
+      assert.equal(null, pipelineResult2(0, {type: 'NULL'}))
+    });
+    it('should chain support commands', function () {
+      const toAdd = 10;
+      assert.equal(10, pipelineResult2(0, {type: 'ADD', data: toAdd}))
+    });
+
+  });
+
+  describe('skip', function () {
+
+    let pipelineResult = pipeline(
+      (state = 0) => {
+        return state;
+      },
+      (state = 0, action, {skip}) => {
+        switch (action.type) {
+          case "NULL":
+            return skip(null);
+          case "UNDEFINED":
+            return skip(undefined);
+          case "ADD":
+            return skip(state + action.data);
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            throw 'Should not reach';
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            return 1;
+          default:
+            return state;
+        }
+      }
+    );
+
+    it('should support undefined', function () {
+      assert.equal(1, pipelineResult(0, {type: 'UNDEFINED'}))
+    });
+    it('should support null', function () {
+      assert.equal(1, pipelineResult(0, {type: 'NULL'}))
+    });
+    it('should support commands', function () {
+      const toAdd = 10;
+      assert.equal(1, pipelineResult(0, {type: 'ADD', data: toAdd}))
+    });
+
+    const pipelineResult2 = pipeline(
+      (state = 0, action, {skip}) => {
+        switch (action.type) {
+          case "NULL":
+            return skip(null, 2);
+          case "UNDEFINED":
+            return skip(undefined, 2);
+          case "ADD":
+            return skip(state + action.data, 2);
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            throw 'Should not reach';
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            return 1;
+          default:
+            return state;
+        }
+      },
+      (state = 0, action) => {
+        switch (action.type) {
+          case "ADD":
+          case "UNDEFINED":
+          case "NULL":
+            return 2;
+          default:
+            return state;
+        }
+      }
+    );
+
+    it('should support undefined', function () {
+      assert.equal(2, pipelineResult2(0, {type: 'UNDEFINED'}))
+    });
+    it('should support null', function () {
+      assert.equal(2, pipelineResult2(0, {type: 'NULL'}))
+    });
+    it('should support commands', function () {
+      const toAdd = 10;
+      assert.equal(2, pipelineResult2(0, {type: 'ADD', data: toAdd}))
+    });
+
   });
 }

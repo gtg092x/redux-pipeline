@@ -249,18 +249,24 @@ store.dispatch({
 // State is: {myNumber: 10, myOtherNumber: -5}
 ```
 
-## Interrupt
+## Pipe
+
+Injected as the third argument into every reducer in the chain. `<pipe>` is an object with basic control flow methods. 
+
+**Important!** Make sure that you pass in your resulting state to any pipe methods you call. You must also return the method itself. Reducers are synchronous, we plan on keeping them that way.
+
+### End
 
 You might want to stop the flow of the reducer chain. This is especially true if you create a generic configurable reducer but want to surpress some actions.
 
 ```js
 import pipeline from 'redux-pipeline';
 
-function blockSubtract(state = 0, action, end) {
+function blockSubtract(state = 0, action, pipe) {
     switch(action.type) {        
         case "SUBTRACT":
             // Notice we're passing state to the end method
-            return end(state);
+            return pipe.end(state);
         default:
             return state;
     }
@@ -300,6 +306,152 @@ store.dispatch({
 ```
 
 Order matters! If you put an interrupting reducer last, it won't change anything about the final output.
+
+### Skip
+
+`skip([state, [count = 1]])`
+
+Skips the next reducer in the pipeline.
+
+```js
+import pipeline from 'redux-pipeline';
+
+function skipSubtract(state = 0, action, pipe) {
+    switch(action.type) {        
+        case "SUBTRACT":
+            // Notice we're passing state to the end method
+            return pipe.skip(state);
+        default:
+            return state;
+    }
+}
+
+
+function mathReducer(state = 0, action) {
+    switch(action.type) {        
+        case "SUBTRACT":
+            return state - action.data;
+        default:
+            return state;
+    }
+}
+
+// We'll get the multiplied subtraction instead
+function mathReducer2(state = 0, action) {
+    switch(action.type) {        
+        case "SUBTRACT":
+            return state - action.data * 2;
+        default:
+            return state;
+    }
+}
+
+const store = createStore(
+  pipeline(
+    skipSubtract, 
+    mathReducer,
+    mathReducer2
+  )
+);
+
+store.dispatch({
+   type: 'SUBTRACT',
+   data: 5
+});
+
+// State is: -10
+```
+
+### Mutate Action
+
+`mutateAction([mutation, [state]])`
+
+Mutates the action for the rest of the pipeline. This is not a control flow method. If you do not pass state, action will return `pipe`. Otherwise you must return the method result and pass in state.
+
+```js
+import pipeline from 'redux-pipeline';
+
+function incrementEnhancer(state = 0, action, pipe) {
+    switch(action.type) {        
+        case "INCREMENT":            
+            return pipe.mutateAction({data: 2}, state);
+        default:
+            return state;
+    }
+}
+
+
+function increment(state = 0, action) {
+    switch(action.type) {        
+        case "INCREMENT":
+            return state + action.data;
+        default:
+            return state;
+    }
+}
+
+
+const store = createStore(
+  pipeline(
+    incrementEnhancer, 
+    increment
+  )
+);
+
+store.dispatch({
+   type: 'INCREMENT'
+});
+
+// State is: 2
+```
+
+You can chain this together if you do not pass a state result.
+
+```js
+import pipeline from 'redux-pipeline';
+
+function incrementEnhancer(state = 0, action, pipe) {
+    switch(action.type) {        
+        case "INCREMENT":            
+            return pipe.mutateAction({data: 2}).skip(state);
+        default:
+            return state;
+    }
+}
+
+function incrementSkipThis(state = 0, action) {
+    switch(action.type) {        
+        case "INCREMENT":
+            throw 'This reducer should not be used';
+        default:
+            return state;
+    }
+}
+
+function increment(state = 0, action) {
+    switch(action.type) {        
+        case "INCREMENT":
+            return state + action.data;
+        default:
+            return state;
+    }
+}
+
+
+const store = createStore(
+  pipeline(
+    incrementEnhancer,
+    incrementSkipThis,
+    increment
+  )
+);
+
+store.dispatch({
+   type: 'INCREMENT'
+});
+
+// State is: 2
+```
 
 ## API
 
