@@ -1,6 +1,6 @@
 {
   "name": "redux-pipeline",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Run Reducers Together",
   "main": "lib/pipeline.js",
   "scripts": {
