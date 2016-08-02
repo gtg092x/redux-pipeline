@@ -8,9 +8,8 @@
     "start": "npm run usage",
     "trees": "./node_modules/.bin/babel-node trees/MyActions",
     "defaults": "./node_modules/.bin/babel-node defaults/MyActions",
-    "interrupt": "./node_modules/.bin/babel-node interrupt/MyActions",
-    "config": "./node_modules/.bin/babel-node config/MyActions",
-    "keys": "./node_modules/.bin/babel-node keys/MyActions"
+    "keys": "./node_modules/.bin/babel-node keys/MyActions",
+    "interrupt": "./node_modules/.bin/babel-node interrupt/MyActions"
   },
   "devDependencies": {
     "babel-core": "^6.7.2",

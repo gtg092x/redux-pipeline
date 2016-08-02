@@ -20,5 +20,13 @@ function subtractReducer(state = 0, action) {
 }
 
 export default createStore(
-  pipeline(addReducer, subtractReducer)
+  pipeline(
+    {myVal: 0, myValNoSub: 0, myDeepVal: {}},
+    ['myVal', pipeline(addReducer, subtractReducer)],
+    ['myValNoSub', pipeline(addReducer)],
+    [
+      'myDeepVal',
+      pipeline({myDeepValData: 10}, ['myDeepValNoAdd', subtractReducer])
+    ],
+  )
 );

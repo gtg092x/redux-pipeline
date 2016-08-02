@@ -10,15 +10,25 @@ function addReducer(state = 0, action) {
   }
 }
 
-function subtractReducer(state = 0, action) {
+function subtractReducer(state = 0, action, end) {
   switch(action.type) {
     case 'SUBTRACT':
-      return state - action.data;
+      return end(state - action.data);
+    default:
+      return state;
+  }
+}
+
+function interruptedReducer(state = 0, action) {
+  switch(action.type) {
+    case 'SUBTRACT':
+      console.log('Should not reach this point');
+      return end(state - action.data);
     default:
       return state;
   }
 }
 
 export default createStore(
-  pipeline(addReducer, subtractReducer)
+  pipeline(addReducer, subtractReducer, interruptedReducer)
 );

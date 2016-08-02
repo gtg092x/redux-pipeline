@@ -20,5 +20,5 @@ function subtractReducer(state = 0, action) {
 }
 
 export default createStore(
-  pipeline(addReducer, subtractReducer)
+  pipeline(100, addReducer, subtractReducer)
 );

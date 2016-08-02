@@ -20,5 +20,9 @@ function subtractReducer(state = 0, action) {
 }
 
 export default createStore(
-  pipeline(addReducer, subtractReducer)
+  pipeline(
+    {hello: 'world', data: 100},
+    ['data', addReducer],
+    ['data', subtractReducer]
+  )
 );
