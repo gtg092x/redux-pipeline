@@ -1,6 +1,6 @@
 {
   "name": "redux-pipeline",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Run Reducers Together",
   "main": "lib/pipeline.js",
   "scripts": {
@@ -15,15 +15,6 @@
       "stage-0",
       "stage-1",
       "stage-2"
-    ],
-    "plugins": [
-      [
-        "transform-runtime",
-        {
-          "polyfill": true,
-          "regenerator": false
-        }
-      ]
     ]
   },
   "nyc": {
