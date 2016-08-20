@@ -65,6 +65,6 @@
   },
   "dependencies": {
     "lodash": "^3.10.1",
-    "reducify": "^1.0.2"
+    "reducify": "^1.0.3"
   }
 }
